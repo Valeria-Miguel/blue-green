@@ -7,7 +7,7 @@ function App() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#24a31fff",
+      background: "#b62195ff",
       padding: "3rem",
       color: "white",
       fontFamily: "Arial",
