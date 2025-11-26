@@ -17,31 +17,39 @@ jobs:
           script: |
             cd /home/imanolcamacho098/blue-green-dulce
 
-            # Resetear cambios locales y actualizar repo
+            echo "=== ACTUALIZANDO REPOSITORIO ==="
             git reset --hard HEAD
             git pull origin main
 
-            # Dar permisos a scripts
             chmod +x scripts/*.sh
 
-            # Detectar puerto activo
-            ACTIVE=$(grep -o "300[1-2]" /etc/nginx/sites-available/app.conf | head -1 || echo "3001")
+            echo "=== DETECTANDO ENTORNO ACTIVO ==="
+            ACTIVE=$(grep -oP 'upstream app_upstream \{[^}]*:(300[1-2])' /etc/nginx/sites-available/app.conf | grep -o '300[1-2]')
+
+            # Si por alguna razón no detecta nada, asumir que blue (3001) es el activo
+            if [ -z "$ACTIVE" ]; then
+              ACTIVE="3001"
+            fi
+
+            echo "Puerto activo actual: $ACTIVE"
+
             if [ "$ACTIVE" = "3001" ]; then
               NEW_ENV="green"
             else
               NEW_ENV="blue"
             fi
 
-            echo "Desplegando nueva versión en $NEW_ENV"
-
+            echo "=== DEPLOYANDO NUEVA VERSION EN $NEW_ENV ==="
             ./scripts/deploy.sh $NEW_ENV
+
             sleep 15
 
-            # Health check de nginx
-            if curl -sf http://127.0.0.1/health; then
+            echo "=== HACIENDO HEALTH CHECK ==="
+            if curl -sf http://127.0.0.1/health >/dev/null; then
+              echo "Health OK → Cambiando tráfico"
               ./scripts/switch.sh $NEW_ENV
-              echo "DESPLIEGUE EXITOSO → $NEW_ENV activo"
+              echo "=== DESPLIEGUE EXITOSO → $NEW_ENV ACTIVO ==="
             else
-              echo "FALLO → ejecutando rollback"
+              echo "FALLO EN HEALTH CHECK → HACIENDO ROLLBACK"
               ./scripts/rollback.sh
             fi
