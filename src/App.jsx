@@ -20,6 +20,9 @@ function App() {
       <h1 style={{ fontSize: "3rem", marginBottom: "1rem" }}>
         Blue-Green Deployment
       </h1>
+      <h1 style={{ fontSize: "3.5rem" }}>
+  GREEN DESPLEGADO AUTOMÁTICAMENTE
+</h1>
 
       <p style={{ fontSize: "1.4rem", maxWidth: "800px" }}>
         Estrategia de despliegue que permite actualizar aplicaciones sin tiempo de inactividad (zero-downtime),
