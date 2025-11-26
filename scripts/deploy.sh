@@ -1,32 +1,13 @@
 #!/bin/bash
 set -e
+ENV=$1
+PORT=3001
+NAME="app-blue"
+[ "$ENV" = "green" ] && PORT=3002 && NAME="app-green"
 
-ENVIRONMENT=$1
-PORT=""
-CONTAINER_NAME=""
-
-if [ "$ENVIRONMENT" == "blue" ]; then
-    PORT=8081
-    CONTAINER_NAME="app-blue"
-elif [ "$ENVIRONMENT" == "green" ]; then
-    PORT=8082
-    CONTAINER_NAME="app-green"
-else
-    echo "Uso: ./deploy.sh [blue|green]"
-    exit 1
-fi
-
-echo "Desplegando en $ENVIRONMENT (puerto $PORT)..."
-
-docker stop $CONTAINER_NAME 2>/dev/null || true
-docker rm $CONTAINER_NAME 2>/dev/null || true
-
+echo "Desplegando $ENV en puerto $PORT..."
 docker build -t blue-green-app:latest .
-
-docker run -d \
-    --name $CONTAINER_NAME \
-    -p $PORT:3000 \
-    --restart unless-stopped \
-    blue-green-app:latest
-
-echo "Despliegue en $ENVIRONMENT completado"
+docker stop $NAME 2>/dev/null || true
+docker rm $NAME 2>/dev/null || true
+docker run -d --name $NAME -p $PORT:3000 --restart unless-stopped blue-green-app:latest
+echo "$ENV desplegado"
