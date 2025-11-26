@@ -24,7 +24,9 @@ jobs:
             chmod +x scripts/*.sh
 
             echo "=== DETECTANDO ENTORNO ACTIVO ==="
-            ACTIVE=$(grep -oP 'upstream app_upstream \{[^}]*:(300[1-2])' /etc/nginx/sites-available/app.conf | grep -o '300[1-2]')
+        
+            ACTIVE=$(awk '/upstream app_upstream/,/}/' /etc/nginx/sites-available/app.conf \ | grep -o '300[1-2]')
+
 
             # Si por alguna razón no detecta nada, asumir que blue (3001) es el activo
             if [ -z "$ACTIVE" ]; then
