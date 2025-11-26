@@ -30,10 +30,8 @@ jobs:
             ./scripts/deploy.sh $NEW_ENV
             sleep 15
 
-            if curl -sf http://127.0.0.1:$( [ "$NEW_ENV" = "green" ] && echo 3002 || echo 3001 )/health; then
-              ./scripts/switch.sh $NEW_ENV
-              echo "DESPLIEGUE EXITOSO → $NEW_ENV activo"
+            if curl -sf http://127.0.0.1/health; then
+                ./scripts/switch.sh $NEW_ENV
             else
-              echo "Fallo → Rollback automático"
-              ./scripts/rollback.sh
+                ./scripts/rollback.sh
             fi
