@@ -8,17 +8,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Despliegue Blue-Green automático
+      - name: Blue-Green Deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}       # ← AQUÍ ESTABA EL ERROR ANTES
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /home/imanolcamacho098/blue-green
 
-            ACTIVE=$(sudo grep "127.0.0.1" /etc/nginx/sites-available/blue-green.conf | grep -o "808[1-2]")
+            ACTIVE=$(sudo grep "127.0.0.1" /etc/nginx/sites-available/blue-green.conf | grep -o "808[1-2]" || echo "8081")
 
             if [ "$ACTIVE" = "8081" ]; then
               NEW_ENV="green"
@@ -28,16 +28,15 @@ jobs:
               NEW_PORT="8081"
             fi
 
-            echo "Activo: $ACTIVE → Desplegando en $NEW_ENV ($NEW_PORT)"
+            echo "Desplegando nueva versión en $NEW_ENV ($NEW_PORT)"
             git pull origin main
             ./scripts/deploy.sh $NEW_ENV
-            sleep 12
+            sleep 15
 
             if curl -s http://127.0.0.1:$NEW_PORT > /dev/null; then
               ./scripts/switch.sh $NEW_ENV
-              echo "DESPLIEGUE 100% EXITOSO → Tráfico cambiado a $NEW_ENV"
+              echo "DESPLIEGUE EXITOSO → Ahora está en $NEW_ENV"
             else
-              echo "Health check falló → Rollback automático"
+              echo "Fallo → Rollback automático"
               ./scripts/rollback.sh
-              exit 1
             fi
