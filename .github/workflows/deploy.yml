@@ -17,7 +17,14 @@ jobs:
           script: |
             cd /home/imanolcamacho098/blue-green-dulce
 
-            # Detectar puerto activo en app.conf
+            # Resetear cambios locales y actualizar repo
+            git reset --hard HEAD
+            git pull origin main
+
+            # Dar permisos a scripts
+            chmod +x scripts/*.sh
+
+            # Detectar puerto activo
             ACTIVE=$(grep -o "300[1-2]" /etc/nginx/sites-available/app.conf | head -1 || echo "3001")
             if [ "$ACTIVE" = "3001" ]; then
               NEW_ENV="green"
@@ -26,12 +33,15 @@ jobs:
             fi
 
             echo "Desplegando nueva versión en $NEW_ENV"
-            git pull origin main
+
             ./scripts/deploy.sh $NEW_ENV
             sleep 15
 
+            # Health check de nginx
             if curl -sf http://127.0.0.1/health; then
-                ./scripts/switch.sh $NEW_ENV
+              ./scripts/switch.sh $NEW_ENV
+              echo "DESPLIEGUE EXITOSO → $NEW_ENV activo"
             else
-                ./scripts/rollback.sh
+              echo "FALLO → ejecutando rollback"
+              ./scripts/rollback.sh
             fi
