@@ -18,8 +18,8 @@ jobs:
             cd /home/imanolcamacho098/blue-green-dulce
 
             echo "=== ACTUALIZANDO REPOSITORIO ==="
-            git reset --hard HEAD
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
 
             chmod +x scripts/*.sh
 
