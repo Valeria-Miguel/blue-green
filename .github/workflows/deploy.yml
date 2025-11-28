@@ -3,11 +3,22 @@ on:
   push:
     branches: [ main ]
 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # 1️⃣ Debug de la clave privada antes de SSH real
+      - name: Debug SSH Key
+        run: |
+          echo "=== DEBUG SSH KEY ==="
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/temp_key
+          chmod 600 ~/.ssh/temp_key
+
+          # Mostrar huella de la clave privada
+          ssh-keygen -lf ~/.ssh/temp_key
+
+      # 2️⃣ Deploy vía SSH
       - name: Deploy Blue-Green
         uses: appleboy/ssh-action@master
         with:
@@ -25,9 +36,8 @@ jobs:
             chmod +x scripts/*.sh
 
             echo "=== DETECTANDO ENTORNO ACTIVO ==="
-        
             ACTIVE=$(awk '/upstream app_upstream/,/}/' /etc/nginx/sites-available/app.conf | grep -o '300[1-2]')
-            
+
             # Si por alguna razón no detecta nada, asumir que blue (3001) es el activo
             if [ -z "$ACTIVE" ]; then
               ACTIVE="3001"
