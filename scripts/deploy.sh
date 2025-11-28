@@ -14,14 +14,14 @@ fi
 
 echo "=== DESPLEGANDO $ENV EN PUERTO $PORT ==="
 
-# Construir la imagen Docker sin cache para asegurar que se tomen todos los cambios
+# construir la imagen Docker sin cache para asegurar que se tomen todos los cambios
 docker build --no-cache -t blue-green-app:latest .
 
-#  Detener y eliminar contenedor anterior si existe
+#  detener y eliminar contenedor anterior si existe
 docker stop $NAME 2>/dev/null || true
 docker rm $NAME 2>/dev/null || true
 
-# Levantar el contenedor nuevo
+# levantar el contenedor nuevo
 docker run -d \
   --name $NAME \
   -p $PORT:3000 \
