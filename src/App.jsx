@@ -18,7 +18,7 @@ function App() {
     }}>
       
       <h1 style={{ fontSize: "3rem", marginBottom: "1rem" }}>
-        Blue-Green Deployment
+        Blue-Green Deploymenttttt
       </h1>
       <h1 style={{ fontSize: "3.5rem" }}>
   GREEN DESPLEGADO AUTOMÁTICAMENTE
